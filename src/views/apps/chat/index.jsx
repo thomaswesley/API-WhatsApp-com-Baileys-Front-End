@@ -753,7 +753,7 @@ const ChatWrapper = () => {
                 >
                   <Box sx={{ display:'flex', flexDirection:'column', width:'100%' }}>
                     <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
-                      Converse com algum amigo
+                      Converse com algum amigo(a)
                     </Typography>
 
                     <TextField
