@@ -494,8 +494,7 @@ const ChatWrapper = () => {
       socket.off('disconnected', disconnected)
       socket.off('bot-response', botResponse)
     }
-  }, [])
-
+  }, [socket])
 
   useEffect(() => {
     //getMessages()  
