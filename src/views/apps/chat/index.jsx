@@ -745,7 +745,12 @@ const ChatWrapper = () => {
 
             {!qrSvg && (
               <Grid container>
-                <Grid item xs={3} className="flex justify-center" sx={{ p: 3,  mx: 'auto' }}>
+                <Grid item 
+                  xs={12} 
+                  sm={3}
+                  className="flex justify-center" 
+                  sx={{ p: 3, mx: 'auto' }}
+                >
                   <Box sx={{ display:'flex', flexDirection:'column', width:'100%' }}>
                     <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
                       Converse com algum amigo
