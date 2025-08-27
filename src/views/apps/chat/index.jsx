@@ -98,7 +98,8 @@ const formatedChatData = (chats, profileUser) => {
       msgGroup.messages.push({
         time: chat.time,
         message: chat.message,
-        msgStatus: chat.msgStatus
+        msgStatus: chat.msgStatus,
+        image: chat.image
       })
     } else {
       chatMessageSenderId = chat.senderId
@@ -109,7 +110,8 @@ const formatedChatData = (chats, profileUser) => {
           {
             time: chat.time,
             message: chat.message,
-            msgStatus: chat.msgStatus
+            msgStatus: chat.msgStatus,
+            image: chat.image
           }
         ]
       }
@@ -122,7 +124,7 @@ const formatedChatData = (chats, profileUser) => {
 }
 
 // Renders the user avatar with badge and user information
-const UserAvatar = ({ activeUser, setUserProfileLeftOpen, setBackdropOpen }) => (
+const UserAvatar = ({ activeUser, setUserProfileLeftOpen, setBackdropOpen, photo }) => (
   <div
     className='flex items-center gap-4 cursor-pointer'
     onClick={() => {
@@ -132,7 +134,7 @@ const UserAvatar = ({ activeUser, setUserProfileLeftOpen, setBackdropOpen }) => 
   >
     <AvatarWithBadge
       alt={activeUser?.fullName}
-      src='/images/avatars/scarlett-johansson.png'
+      src={photo}
       color={activeUser?.avatarColor}
       badgeColor='success'
     />
@@ -161,7 +163,13 @@ const ChatWrapper = () => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
 
-  const [messageQrCode, setMessageQrCode] = useState(null)
+  const [messageQrCode, setMessageQrCode] = useState('')
+  const [messageDisconnected, setMessageDisconnected] = useState(false)
+  const [name, setName] = useState('Usuário')
+  const [userId, setUserId] = useState('Celular')
+  const [photoUrl, setPhotoUrl] = useState(<AvatarsIcon />)
+  const [photoUrlSender, setPhotoUrlSender] = useState(<AvatarsIcon />)
+  
   const [qrSvg, setQrSvg] = useState('');
 
   const anchorRef = useRef(null)
@@ -187,7 +195,7 @@ const ChatWrapper = () => {
   
     "profileUser": {
         "id": 1,
-        "avatar": <AvatarsIcon />,
+        "avatar": <AvatarWithBadge src={photoUrl} />,
         "fullName": "Thomas",
         "role": "Admin",
         "about": "",
@@ -205,7 +213,7 @@ const ChatWrapper = () => {
             "avatarColor": "primary",
             "about": "",
             "status": "busy",
-            "avatar": '/images/avatars/scarlett-johansson.png'
+            "avatar": <AvatarWithBadge src={photoUrlSender} />
         },
     ],
     "chats": [
@@ -218,16 +226,16 @@ const ChatWrapper = () => {
     ],
     "activeUser": {
         "id": 3,
-        "fullName": "Charlene",
-        "role": "API WhatsApp com Baileys",
+        "fullName": name,
+        "role": userId,
         "avatarColor": "primary",
         "about": "",
         "status": "busy",
-        "avatar": '/images/avatars/scarlett-johansson.png'
+        "avatar": photoUrlSender
     }
   }
 
-  const { activeUser, profileUser, contacts } = chatStore  
+  const { activeUser, profileUser, contacts } = chatStore
 
   const handleToggle = () => {
     setOpenEmojiPicker(prevOpen => !prevOpen)
@@ -286,6 +294,7 @@ const ChatWrapper = () => {
     event.preventDefault()
 
     if (!isPhoneValid(phone)) {
+      alert('Por favor, digite o DDD + 8 dígitos (ex.: 11 34567890)')
       setPhoneErr('Por favor, digite o DDD + 8 dígitos (ex.: 11 34567890)');
       return;
     }
@@ -296,6 +305,8 @@ const ChatWrapper = () => {
 
       setMsg('')
 
+      alert('Por favor, escreva uma mensagem.')
+
       return
     }
     
@@ -304,7 +315,9 @@ const ChatWrapper = () => {
     const data = {
       "to": to,
       "message": msg,
-      "indiceArrayNewMessage": indiceArrayNewMessage
+      "indiceArrayNewMessage": indiceArrayNewMessage,
+      "name": name,
+      "userId": userId
     }
 
     const now = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
@@ -395,8 +408,22 @@ const ChatWrapper = () => {
     const onConnected = (msg) => {
 
       console.log('A conexão do WhatsApp está ativa', msg)
+
       setQrSvg('')
-      setMessageQrCode(msg)
+      setMessageQrCode(msg.message)
+      setMessageDisconnected(false)
+
+      if (msg.sock.name) {
+        setName(msg.sock.name)
+      }
+
+      if (msg.sock.id) {
+        setUserId(msg.sock.id)
+      }
+
+      if (msg.photoUrl) {
+        setPhotoUrl(msg.photoUrl)
+      }
     }
 
     const onQr = (msg) => {
@@ -405,6 +432,7 @@ const ChatWrapper = () => {
       
       setQrSvg(msg.svg)
       setMessageQrCode(msg.message)
+      setMessageDisconnected(true)
     }
 
     const messageSaved = (msg) => {
@@ -418,11 +446,16 @@ const ChatWrapper = () => {
       
       setQrSvg(msg.svg)
       setMessageQrCode(msg.message)
+      setMessageDisconnected(true)
     }
 
     const botResponse = (msg) => {
 
       console.log('Mensagem de usuário recebida', msg)
+
+      if (msg.content.photoUrl) {
+        setPhotoUrlSender(msg.content.photoUrl)
+      }
 
       setMessages((prev) => [...prev, msg.content]);
 
@@ -492,17 +525,17 @@ const ChatWrapper = () => {
           console.log(response.data)
 
           if (!response.data.error) {
-            setMessageQrCode(response.data)
+            //setMessageQrCode(response.data)
           } else {
-            getGerarQrCode()
+            //getGerarQrCode()
           }
 
           return response.data
         })
         .catch(error => {
           console.log('Error getStatusConexao', error)
-          setMessageQrCode(error.response.data)
-          getGerarQrCode()
+          //setMessageQrCode(error.response.data)
+          //getGerarQrCode()
         })
         .finally(function () {
           // always executed
@@ -530,13 +563,25 @@ const ChatWrapper = () => {
           console.log(response.data)
 
           setMessageQrCode(response.data.message)
-          setQrSvg(response.data.data);  
+          setQrSvg(response.data.data);
+
+          if (response.data.sock.name) {
+            setName(response.data.sock.name)
+          }
+
+          if (response.data.sock.id) {
+            setUserId(response.data.sock.id)
+          }
+
+          if (response.data.photoUrl) {
+            setPhotoUrl(response.data.photoUrl)
+          }
 
           return response.data
         })
         .catch(error => {
           console.log('Error getGerarQrCode', error)
-          setMessageQrCode(error.response.data)
+          setMessageQrCode(error.response.data.message)
         })
         .finally(function () {
           // always executed
@@ -682,8 +727,8 @@ const ChatWrapper = () => {
             
             {messageQrCode && (
               <Grid item xs={3} className="flex justify-center" sx={{ p: 3 }}>
-                <Alert severity={messageQrCode?.error === false ? 'success' : 'error'}>
-                  {messageQrCode?.message ?? String(messageQrCode)}
+                <Alert severity={messageDisconnected === false ? 'success' : 'error'}>
+                  {messageQrCode}
                 </Alert>
               </Grid>
             )}
@@ -700,20 +745,28 @@ const ChatWrapper = () => {
             )}
 
             {!qrSvg && (
-              <Grid item xs={3} className="flex justify-center" sx={{ p: 3 }}>
-                <TextField
-                  label="Celular"
-                  placeholder="1188882222"
-                  size="small"
-                  value={phone}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    if (phoneErr) setPhoneErr('');
-                  }}
-                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                  error={Boolean(phoneErr)}
-                  helperText={phoneErr || 'Ex.: 1188882222'}
-                />
+              <Grid container>
+                <Grid item xs={3} className="flex justify-center" sx={{ p: 3,  mx: 'auto' }}>
+                  <Box sx={{ display:'flex', flexDirection:'column', width:'100%' }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
+                      Converse com algum amigo
+                    </Typography>
+
+                    <TextField
+                      label="Celular"
+                      placeholder="1188882222"
+                      size="small"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (phoneErr) setPhoneErr('');
+                      }}
+                      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                      error={Boolean(phoneErr)}
+                      helperText={phoneErr || 'Ex.: 1188882222'}
+                    />
+                  </Box>
+                </Grid>
               </Grid>
             )}
 
@@ -723,6 +776,7 @@ const ChatWrapper = () => {
                 activeUser={activeUser}
                 setBackdropOpen={setBackdropOpen}
                 setUserProfileLeftOpen={setUserProfileRightOpen}
+                photo={photoUrl}
               />
             </div>
 
@@ -756,18 +810,34 @@ const ChatWrapper = () => {
                             'max-is-[calc(100%-5.75rem)]': isBelowSmScreen
                           })}
                         >
-                          {msgGroup.messages.map((msg, index) => (
-                            <Typography
-                              key={index}
-                              className={classnames('whitespace-pre-wrap pli-4 plb-2 shadow-xs', {
-                                'bg-backgroundPaper rounded-e-lg rounded-b-lg': !isSender,
-                                'bg-primary text-[var(--mui-palette-primary-contrastText)] rounded-s-lg rounded-b-lg': isSender
-                              })}
-                              style={{ wordBreak: 'break-word' }}
-                            >
-                              {msg.message}
-                            </Typography>
-                          ))}
+                          {msgGroup.messages.map((msg, index) => {
+                            const bubbleClass = classnames('whitespace-pre-wrap pli-4 plb-2 shadow-xs', {
+                              'bg-backgroundPaper rounded-e-lg rounded-b-lg': !isSender,
+                              'bg-primary text-[var(--mui-palette-primary-contrastText)] rounded-s-lg rounded-b-lg': isSender
+                            })
+
+                            return (
+                              <div key={index} className={bubbleClass} style={{ wordBreak: 'break-word' }}>
+                                {/* IMAGEM PRIMEIRO (se houver) */}
+                                {msg.image && (
+                                  <Box
+                                    component="img"
+                                    src={msg.image}
+                                    alt={msg.imageCaption || ''}
+                                    sx={{ maxWidth: 280, borderRadius: 2, display: 'block', mb: (msg.message || msg.imageCaption) ? 1 : 0 }}
+                                  />
+                                )}
+
+                                {/* MENSAGEM (ou legenda) ABAIXO */}
+                                {(msg.message || msg.imageCaption) && (
+                                  <Typography component="div" variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                    {msg.message || msg.imageCaption}
+                                  </Typography>
+                                )}
+                              </div>
+                            )
+                          })}
+
                           {msgGroup.messages.map(
                             (msg, index) =>
                               index === msgGroup.messages.length - 1 &&
