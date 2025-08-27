@@ -348,7 +348,7 @@ const ChatWrapper = () => {
         }
       }).then(response => {
 
-        console.log('Resposta postMessages', response.data)
+        //console.log('Resposta postMessages', response.data)
 
         if (!response.data.error) {
 
@@ -358,7 +358,7 @@ const ChatWrapper = () => {
 
       }).catch(error => {
 
-        console.log('/messages', error)
+        //console.log('/messages', error)
 
         return error
       })
@@ -367,7 +367,7 @@ const ChatWrapper = () => {
 
     } catch (error) {
 
-      console.log('Erro postMessages', error)
+      //console.log('Erro postMessages', error)
 
       return error
     }
@@ -379,7 +379,7 @@ const ChatWrapper = () => {
 
       const data = await apiChat.get('/messages').then(response => {
 
-        console.log('Resposta getMessages', response.data)
+        //console.log('Resposta getMessages', response.data)
 
         if (!response.data.error) {
           setMessages(response.data.data)
@@ -389,7 +389,7 @@ const ChatWrapper = () => {
 
       }).catch(error => {
       
-        console.log(error)
+        //console.log(error)
       
       }).finally(function () {
       
@@ -400,14 +400,14 @@ const ChatWrapper = () => {
 
     } catch (error) {
 
-      console.log(error)
+      //console.log(error)
     }
   }
 
   useEffect(() => {
     const onConnected = (msg) => {
 
-      console.log('A conexão do WhatsApp está ativa', msg)
+      //console.log('A conexão do WhatsApp está ativa', msg)
 
       setQrSvg('')
       setMessageQrCode(msg.message)
@@ -428,7 +428,7 @@ const ChatWrapper = () => {
 
     const onQr = (msg) => {
 
-      console.log('Atualização do QR Code em connection.update', msg)
+      //console.log('Atualização do QR Code em connection.update', msg)
       
       setQrSvg(msg.svg)
       setMessageQrCode(msg.message)
@@ -437,12 +437,12 @@ const ChatWrapper = () => {
 
     const messageSaved = (msg) => {
 
-      console.log('A conexão do WhatsApp está ativa', msg)
+      //console.log('A conexão do WhatsApp está ativa', msg)
     }
 
     const disconnected = (msg) => {
 
-      console.log('A conexão do WhatsApp está desativada', msg)
+      //console.log('A conexão do WhatsApp está desativada', msg)
       
       setQrSvg(msg.svg)
       setMessageQrCode(msg.message)
@@ -451,7 +451,7 @@ const ChatWrapper = () => {
 
     const botResponse = (msg) => {
 
-      console.log('Mensagem de usuário recebida', msg)
+      //console.log('Mensagem de usuário recebida', msg)
 
       if (msg.content.photoUrl) {
         setPhotoUrlSender(msg.content.photoUrl)
@@ -503,7 +503,7 @@ const ChatWrapper = () => {
   }, [])
 
   useEffect(() => {
-    console.log('messages', messages)
+    //console.log('messages', messages)
 
     scrollToBottom()
 
@@ -520,8 +520,8 @@ const ChatWrapper = () => {
           }
         }).then(response => {
 
-          console.log('/api/whatsapp/status-conexao')
-          console.log(response.data)
+          //console.log('/api/whatsapp/status-conexao')
+          //console.log(response.data)
 
           if (!response.data.error) {
             //setMessageQrCode(response.data)
@@ -532,7 +532,7 @@ const ChatWrapper = () => {
           return response.data
         })
         .catch(error => {
-          console.log('Error getStatusConexao', error)
+          //console.log('Error getStatusConexao', error)
           //setMessageQrCode(error.response.data)
           //getGerarQrCode()
         })
@@ -543,7 +543,7 @@ const ChatWrapper = () => {
       return data
 
     } catch (error) {
-      console.log('Error getStatusConexao', error)
+      //console.log('Error getStatusConexao', error)
     }
   }
 
@@ -558,8 +558,8 @@ const ChatWrapper = () => {
           }
         }).then(response => {
 
-          console.log('/api/whatsapp/gerar-qr-code')
-          console.log(response.data)
+          //console.log('/api/whatsapp/gerar-qr-code')
+          //console.log(response.data)
 
           setMessageQrCode(response.data.message)
           setQrSvg(response.data.data);
@@ -579,7 +579,7 @@ const ChatWrapper = () => {
           return response.data
         })
         .catch(error => {
-          console.log('Error getGerarQrCode', error)
+          //console.log('Error getGerarQrCode', error)
           setMessageQrCode(error.response.data.message)
         })
         .finally(function () {
@@ -589,7 +589,7 @@ const ChatWrapper = () => {
       return data
 
     } catch (error) {
-      console.log('Error getGerarQrCode', error)
+      //console.log('Error getGerarQrCode', error)
     }
   }
 
